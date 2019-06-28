@@ -1,0 +1,44 @@
+-
+  name: Install 3CX
+  hosts: all
+  tasks:
+    -
+      name: Get public key
+      get_url:
+        url: http://downloads-global.3cx.com/downloads/3cxpbx/public.key
+        dest: /root/public.key
+
+    -
+      name: Add package key
+      apt_key:
+        file: /root/public.key
+    -
+      name: Display 3cxpbx list and save it
+      shell: echo "deb http://downloads-global.3cx.com/downloads/debian stretch main" | tee /etc/apt/sources.list.d/3cxpbx.list
+    -
+      name: Display stretch testing and save it
+      shell: echo "deb http://downloads-global.3cx.com/downloads/debian stretch-testing main" | tee /etc/apt/sources.list.d/3cxpbx-testing.list
+    -
+      name: Update to newest versions of packages and their dependencies
+      command: apt update
+    -
+      name: Install Swap file
+      command: apt install -y net-tools dphys-swapfile
+    -
+      name: Install pip
+      command: apt install -y python-pip
+    -
+      name: Install pexpect
+      command: pip install pexpect
+    -
+      name: Install 3cx pbx
+      ignore_errors: yes
+      shell: echo "1" | apt install -y 3cxpbx
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      register: expect_output
+    -
+      name: Display expect output
+      debug:
+        var: expect_output
+
